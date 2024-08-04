@@ -1,0 +1,22 @@
+identify the reason for a pod restart in Kubernetes, especially given the context of resource quotas 
+and Java application behavior, we can follow these steps:
+
+# check the pod events / logs and status first:
+kubectl describe pod java-app-7d9d44ccbf-lmvbc -n production
+
+kubectl logs java-app-7d9d44ccbf-lmvbc -n production
+
+kubectl get pod java-app-7d9d44ccbf-lmvbc -n production -o wide
+
+Java applications might restart due to application-level issues, such as unhandled exceptions or errors in the application logic.
+
+
+#Possible Reasons for Pod Restarts
+the Kubernetes node may kill and restart the container due to an OOM- out of memory condition.
+check the resource requests and limits for each container are appropriately set to avoid any contention or excessive resource usage.
+
+#Health Checks and Liveness Probes
+kubectl describe pod java-app-7d9d44ccbf-lmvbc -n production
+
+the sum up is applying the above commands we can find out the exact issue of pod restart.
+

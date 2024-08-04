@@ -1,0 +1,24 @@
+
+To shard the sanfrancisco.company_name collection based on _id in MongoDB, I will need to follow several steps. Sharding helps distribute the data across multiple servers to improve performance and manageability. below are the step-by-step guide to achieve this:
+MongoDB 4.4.0 or Above: Ensure that MongoDB version is 4.4.0 or higher.
+Sharding Enabled: Make sure that sharding is enabled in MongoDB setup.
+Replica Sets Configured: Both replicaset_1 and replicaset_2 should be properly configured and added to the cluster.
+
+#Steps to Shard the Collection:
+Fisrt: Connect to the MongoDB Instance:
+# mongo --host 127.0.01 --port 27017
+
+second: Enable Sharding for the Database: Enable sharding on the sanfrancisco database:
+mongos> sh.enableSharding("sanfrancisco")
+
+third: Create a Shard Key: Choose _id as the shard key for the company_name collection.
+mongos> sh.shardCollection("sanfrancisco.company_name", { "_id": 1 })
+
+four: Verify Sharding Status:
+mongos> sh.status()
+
+five: Monitor the Balancer:
+mongos> sh.getBalancerState()
+
+
+#this is the process so far I'm familiar with that but in my experience I did not do above kind of things in production grade most of the time I have configured database cluster.

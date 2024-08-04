@@ -1,0 +1,9 @@
+# How Prometheus Works
+Prometheus is an open-source monitoring and alerting toolkit that collects metrics from configured targets at specified intervals. 
+It stores these metrics as time-series data, allowing you to query and visualize them using PromQL
+
+
+
+# What is the Prometheus query you can use in Granfana to properly show usage trend of an application metric that is a counter?
+
+Query Using rate(): rate(http_requests_total[5m])

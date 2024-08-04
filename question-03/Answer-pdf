@@ -1,0 +1,99 @@
+deploy the ntpd package with a custom configuration on the specified servers and configure Nagios monitoring, 
+we can use Ansible to automate the process. below of the step-by-step guide to achieve this:
+
+#First create an Ansible inventory file named hosts.ini with the following content:
+
+[ntp_servers]
+app-vm1.fra1.internal ansible_host=192.168.0.2
+db-vm1.fra1.db ansible_host=192.168.0.3
+web-vm1.fra1.web ansible_host=192.168.0.4
+
+[nagios_server]
+monitoring.fra1.internal ansible_host=192.168.0.5 ansible_user=ashraful
+
+
+#then create a playbook named ntp.yaml to install and configure npt servers:
+---
+- name: Deploy NTPD on servers
+  hosts: ntp_servers
+  become: true
+  tasks:
+    - name: Install ntp package
+      apt:
+        name: ntp
+        state: present
+        update_cache: yes
+
+    - name: Deploy custom ntp.conf
+      copy:
+        dest: /etc/ntp.conf
+        content: |
+          tinker panic 0
+          restrict default kod nomodify notrap nopeer noquery
+          restrict -6 default kod nomodify notrap nopeer noquery
+          restrict 127.0.0.1
+          restrict -6 ::1
+          server 192.168.0.252 minpoll 4 maxpoll 8
+          server 192.168.0.251 minpoll 4 maxpoll 8
+          server 192.168.0.0 # local clock
+          fudge 192.168.0.0 stratum 10
+          driftfile /var/lib/ntp/drift
+          keys /etc/ntp/keys
+
+    - name: Restart ntp service
+      service:
+        name: ntp
+        state: restarted
+
+
+#then create a playbook nagios.yaml to add ngios configuration for monitoring the ntp servers:
+---
+- name: Configure Nagios for NTP monitoring
+  hosts: nagios_server
+  become: true
+  tasks:
+    - name: Define Nagios host for each NTP server
+      template:
+        src: templates/host.cfg.j2
+        dest: /etc/nagios/servers/{{ item }}.cfg
+      with_items:
+        - app-vm1.fra1.internal
+        - db-vm1.fra1.db
+        - web-vm1.fra1.web
+
+    - name: Define Nagios service for each NTP server
+      template:
+        src: templates/service.cfg.j2
+        dest: /etc/nagios/servers/{{ item }}_service.cfg
+      with_items:
+        - app-vm1.fra1.internal
+        - db-vm1.fra1.db
+        - web-vm1.fra1.web
+
+    - name: Restart Nagios service
+      service:
+        name: nagios
+        state: restarted
+
+
+#create a ngios template file where the directory name would be templates
+templates/host.cfg.j2
+define host {
+  host_name  {{ inventory_hostname }}
+  address    {{ hostvars[inventory_hostname].ansible_host }}
+  check_command check-ping
+  active_checks_enabled 1
+  passive_checks_enabled 1
+}
+
+templates/service.cfg.j2
+define service {
+  service_description ntp_process
+  host_name           {{ inventory_hostname }}
+  check_command       check_ntp
+  check_interval      10
+}
+
+#now run the playbook ntp servers configuration and ngios monitoring configurations respectively:
+ansible-playbook -i hosts.ini ntp.yml
+ansible-playbook -i hosts.ini nagios.yml

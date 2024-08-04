@@ -1,0 +1,16 @@
+{{- $appname := .Values.global.name -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $appname }}-configmap
+  namespace: {{ .Values.global.namespace }}
+data:
+  elasticsearch.yml: |
+    cluster.name: {{ $appname }}
+    node.master: true
+    node.data: true
+    node.ingest: true
+    network.host: 0.0.0.0
+    cluster.initial_master_nodes: customer-abc-elasticsearch-0,customer-abc-elasticsearch-1,customer-abc-elasticsearch-2
+

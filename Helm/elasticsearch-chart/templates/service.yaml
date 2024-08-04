@@ -1,0 +1,44 @@
+{{- $appname := .Values.global.name -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appname }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ $appname | quote }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: transport
+    port: 9300
+    protocol: TCP
+    targetPort: 9300
+  - name: http
+    port: 9200
+    protocol: TCP
+    targetPort: 9200
+  selector:
+    app: {{ $appname | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appname }}-headless
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ $appname | quote }}
+spec:
+  clusterIP: None
+  ports:
+  - name: transport
+    port: 9300
+    protocol: TCP
+    targetPort: 9300
+  - name: http
+    port: 9200
+    protocol: TCP
+    targetPort: 9200
+  selector:
+    app: {{ $appname | quote }}
+

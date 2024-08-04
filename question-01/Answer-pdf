@@ -1,0 +1,3 @@
+ansible <hostname> -i hosts.ini -m setup
+
+# just replace the hostname with your specific host and in this command uses the setup module to gather facts from the specified host.

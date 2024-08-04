@@ -1,0 +1,15 @@
+# To run the cron job all machine by using ansible here is the playbook.
+---
+- name: Configure logrotate cron job on all machines
+  hosts: all_machines
+  become: true  # Run commands as root
+  tasks:
+    - name: Add logrotate cron job
+      cron:
+        name: "Logrotate"
+        minute: "*/10"
+        hour: "2-4"  # Runs every 10 minutes from 2:00 to 3:59
+        job: "/usr/sbin/logrotate /etc/logrotate.conf"
+
+To run the playbook
+# ansible-playbook -i hosts.ini logrotate_cron.yml
